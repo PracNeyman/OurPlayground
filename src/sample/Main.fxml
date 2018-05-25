@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.CubicCurve?>
+
+<GridPane fx:id="whole_pane" alignment="center" hgap="10" vgap="10" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
+    <HBox fx:id="param_bar" alignment="TOP_CENTER" spacing="20" GridPane.rowIndex="0">
+      <opaqueInsets>
+         <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+      </opaqueInsets>
+
+        <children>
+            <Button fx:id="start_btn" onAction="#start" text="启动" />
+            <VBox>
+                <Label text="Epoch" />
+                <Label fx:id="epoch" text="000,000" />
+            </VBox>
+            <VBox>
+                <Label text="Learning rate" />
+                <ComboBox fx:id="learning_rate" />
+            </VBox>
+            <VBox>
+                <Label text="Activation" />
+                <ComboBox fx:id="activation" />
+            </VBox>
+            <VBox>
+                <Label text="Regularition" />
+                <ComboBox fx:id="regularition" />
+            </VBox>
+            <VBox>
+                <Label text="Regularition rate" />
+                <ComboBox fx:id="regularition_rate" />
+            </VBox>
+            <VBox>
+                <Label text="Problem type" />
+                <ComboBox fx:id="problem_type" />
+            </VBox>
+        </children>
+    </HBox>
+    <HBox GridPane.rowIndex="1">
+        <VBox>
+            <Button fx:id="select_data_btn" onAction="#select_btn" text="选择数据">
+            <VBox.margin>
+               <Insets left="20.0" top="35.0" />
+            </VBox.margin></Button>
+        </VBox>
+      <HBox fx:id="label_bar" alignment="TOP_CENTER" prefHeight="100.0" prefWidth="621.0" spacing="20.0">
+         <children>
+            <Label text="FEATURE">
+               <HBox.margin>
+                  <Insets top="40.0" />
+               </HBox.margin></Label>
+            <HBox fx:id="layer_bar" alignment="CENTER" prefHeight="100.0" prefWidth="353.0" spacing="20.0">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#addLayer" text="+" />
+                  <Button mnemonicParsing="false" onAction="#subLayer" text="-" />
+                  <Label text="3 HIDDEN LAYSERS" />
+               </children>
+               <opaqueInsets>
+                  <Insets left="30.0" right="30.0" />
+               </opaqueInsets>
+            </HBox>
+            <VBox fx:id="output_bar" alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="164.0">
+               <children>
+                  <Label text="OUTPUT" />
+                  <Label prefHeight="20.0" prefWidth="122.0" text="Test loss is 0.500" />
+                  <Label prefHeight="20.0" prefWidth="164.0" text="Training loss is 0.514" />
+               </children></VBox>
+         </children>
+         <padding>
+            <Insets right="-80.0" />
+         </padding>
+      </HBox>
+    </HBox>
+    <Pane fx:id="canvas" prefHeight="307.0" prefWidth="731.0" GridPane.columnSpan="2" GridPane.rowIndex="2" GridPane.rowSpan="2">
+    </Pane>
+   <columnConstraints>
+      <ColumnConstraints />
+      <ColumnConstraints />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+   </rowConstraints>
+
+
+</GridPane>
