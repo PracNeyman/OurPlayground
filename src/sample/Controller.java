@@ -1,7 +1,6 @@
 package sample;
 
-import com.jfoenix.controls.JFXButton;
-import javafx.animation.RotateTransition;
+import javafx.animation.*;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -19,10 +18,9 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.CubicCurve;
-import javafx.scene.shape.StrokeLineCap;
+import javafx.scene.shape.*;
 import javafx.util.Duration;
+import sun.font.TrueTypeFont;
 
 import java.util.ArrayList;
 
@@ -49,12 +47,16 @@ public class Controller {
     private InputLayer inputLayer = new InputLayer();
     private HiddenLayers hiddenLayers = new HiddenLayers();
     private ImageView outputLayer;
+    private Group rects = new Group();
 
     private boolean useCirclePic = true;
 
     private Group lines = new Group();
     private int inputNum = 5;
     private List<Integer> hiddenNums = new ArrayList<>();       //记录每个隐藏层的神经元个数
+
+    private ParallelTransition parallelTransition = new ParallelTransition();
+    private boolean createLine = true;
 
     private double input_left;
     private double input_top;
@@ -82,6 +84,8 @@ public class Controller {
     }
 
     void addChildrenToCanvas(){
+        rects.getChildren().clear();
+        parallelTransition.getChildren().clear();
 
         getInput();
         getHidden();
@@ -89,7 +93,7 @@ public class Controller {
 
 
         canvas.getChildren().clear();
-        canvas.getChildren().addAll(lines, inputLayer.circleGroup,inputLayer.labelGroup,outputLayer);
+        canvas.getChildren().addAll(lines,rects, inputLayer.circleGroup,inputLayer.labelGroup,outputLayer);
         for(Group group:hiddenLayers.hiddenAddOrSub){
             canvas.getChildren().add(group);
         }
@@ -225,24 +229,6 @@ public class Controller {
         //如果当前已经添加了隐藏层，那么取出第一层隐藏层的每一个神经元与输入层进行贝塞尔曲线连接
         if(!circleGroup.isEmpty())
             addLineBtw2Layer(inputLayer.circleGroup, circleGroup.get(0));
-//        if(!circleGroup.isEmpty()) {
-//            for (int i = 0; i < inputLayer.circleGroup.getChildren().size(); i++) {
-//                Circle inputCircle = (Circle) inputLayer.circleGroup.getChildren().get(i);
-//                for (int j = 0; j < circleGroup.get(0).getChildren().size();j++){
-//                    Circle hiddenCircle = (Circle) circleGroup.get(0).getChildren().get(j);
-//                    CubicCurve cubicCurve = new CubicCurve();
-//                    cubicCurve.setStartX(inputCircle.getLayoutX()+2*inputCircle.getRadius());
-//                    cubicCurve.setStartY(inputCircle.getLayoutY()+inputCircle.getRadius());
-//                    cubicCurve.setControlX1((inputCircle.getLayoutX()+hiddenCircle.getLayoutX())*1/3);
-//                    cubicCurve.setControlY1(inputCircle.getLayoutY());
-//                    cubicCurve.setControlX2((inputCircle.getLayoutX()+hiddenCircle.getLayoutX())*2/3);
-//                    cubicCurve.setControlY1(hiddenCircle.getLayoutY());
-//                    cubicCurve.setEndX(hiddenCircle.getLayoutX());
-//                    cubicCurve.setEndY(hiddenCircle.getLayoutY());
-//                    lines.getChildren().add(cubicCurve);
-//                }
-//            }
-//        }
     }
 
     void getOutput(){
@@ -263,12 +249,9 @@ public class Controller {
         for (int i = 0; i < group1.getChildren().size(); i++) {
             Circle inputCircle = (Circle) group1.getChildren().get(i);
             CubicCurve cubicCurve = new CubicCurve();
+            cubicCurve.getStrokeDashArray().addAll(30d, 20d);
             cubicCurve.setStartX(inputCircle.getLayoutX());
             cubicCurve.setStartY(inputCircle.getLayoutY());
-//            cubicCurve.setControlX1((inputCircle.getLayoutX()+outputLayer.getLayoutX())*1/3);
-//            cubicCurve.setControlY1((inputCircle.getLayoutY()+outputLayer.getLayoutY())*2/3);
-//            cubicCurve.setControlX2((inputCircle.getLayoutX()+outputLayer.getLayoutX())*2/3);
-//            cubicCurve.setControlY2((inputCircle.getLayoutY()+outputLayer.getLayoutY())*1/3);
             cubicCurve.setControlX1((inputCircle.getLayoutX()+outputLayer.getLayoutX())*5/11);
             cubicCurve.setControlY1((inputCircle.getLayoutY()+outputLayer.getLayoutY())*5/11);
             cubicCurve.setControlX2((inputCircle.getLayoutX()+outputLayer.getLayoutX())*6/11);
@@ -276,11 +259,35 @@ public class Controller {
             cubicCurve.setEndX(outputLayer.getLayoutX()+outputLayer.getFitWidth()/2);
             cubicCurve.setEndY(outputLayer.getLayoutY()+outputLayer.getFitHeight()/2);
 
-            cubicCurve.setStroke(Color.valueOf(MyUtil.getRandomColor()));
+            String curColor = MyUtil.getRandomColor();
+            cubicCurve.setStroke(Color.valueOf(curColor));
             cubicCurve.setStrokeWidth(2);
             cubicCurve.setStrokeLineCap(StrokeLineCap.ROUND);
             cubicCurve.setFill(Color.CORNSILK.deriveColor(0, 0, 1, 0));
-            lines.getChildren().add(cubicCurve);
+            if(createLine)
+                lines.getChildren().add(cubicCurve);
+            double len = Math.sqrt(Math.pow(cubicCurve.getEndY()-cubicCurve.getStartY(),2)+Math.pow(cubicCurve.getEndX()-cubicCurve.getStartX(),2));
+            //len略小于线的总长度
+            double rectWidth = 20;
+            for(int j = 0;j<len/ (0.9*rectWidth);j++) {
+                Rectangle rectangle = new Rectangle(inputCircle.getLayoutX(), inputCircle.getLayoutY(), rectWidth, 3);
+                rectangle.setArcHeight(0.5);
+                rectangle.setArcWidth(0.5);
+                rectangle.setFill(Color.valueOf(curColor));
+                Path path = new Path();
+                path.getElements().add(new MoveTo(cubicCurve.getStartX(), cubicCurve.getStartY()));
+                path.getElements().add(new CubicCurveTo(cubicCurve.getControlX1(), cubicCurve.getControlY1(), cubicCurve.getControlX2(), cubicCurve.getControlY2(), cubicCurve.getEndX(), cubicCurve.getEndY()));
+                PathTransition pathTransition = new PathTransition();
+                pathTransition.setDuration(Duration.millis(2000));
+                pathTransition.setPath(path);
+                pathTransition.setNode(rectangle);
+                pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
+                pathTransition.setCycleCount(Timeline.INDEFINITE);
+                pathTransition.setAutoReverse(false);
+                pathTransition.setDelay(Duration.millis(200*j));
+                rects.getChildren().add(rectangle);
+                parallelTransition.getChildren().add(pathTransition);
+            }
         }
     }
 
@@ -291,6 +298,7 @@ public class Controller {
             for (int j = 0; j < group2.getChildren().size();j++){
                 Circle hiddenCircle = (Circle) group2.getChildren().get(j);
                 CubicCurve cubicCurve = new CubicCurve();
+                cubicCurve.getStrokeDashArray().addAll(25d, 10d);
                 cubicCurve.setStartX(inputCircle.getLayoutX());
                 cubicCurve.setStartY(inputCircle.getLayoutY());
                 cubicCurve.setControlX1((inputCircle.getLayoutX()+hiddenCircle.getLayoutX())*7/15);
@@ -303,12 +311,34 @@ public class Controller {
 //                cubicCurve.setControlY2(inputCircle.getLayoutY());
                 cubicCurve.setEndX(hiddenCircle.getLayoutX());
                 cubicCurve.setEndY(hiddenCircle.getLayoutY());
-
-                cubicCurve.setStroke(Color.valueOf(MyUtil.getRandomColor()));
+                String curColor = MyUtil.getRandomColor();
+                cubicCurve.setStroke(Color.valueOf(curColor));
                 cubicCurve.setStrokeWidth(2);
                 cubicCurve.setStrokeLineCap(StrokeLineCap.ROUND);
                 cubicCurve.setFill(Color.CORNSILK.deriveColor(0, 0, 1, 0));
-                lines.getChildren().add(cubicCurve);
+                if(createLine)
+                    lines.getChildren().add(cubicCurve);
+                double len = Math.sqrt(Math.pow(cubicCurve.getEndY()-cubicCurve.getStartY(),2)+Math.pow(cubicCurve.getEndX()-cubicCurve.getStartX(),2));
+                double rectWidth = 15;
+                for(int k = 0;k<len/ (1.2*rectWidth);k++) {
+                    Rectangle rectangle = new Rectangle(inputCircle.getLayoutX(), inputCircle.getLayoutY(), rectWidth, 3);
+                    rectangle.setArcHeight(0.5);
+                    rectangle.setArcWidth(0.5);
+                    rectangle.setFill(Color.valueOf(curColor));
+                    Path path = new Path();
+                    path.getElements().add(new MoveTo(cubicCurve.getStartX(), cubicCurve.getStartY()));
+                    path.getElements().add(new CubicCurveTo(cubicCurve.getControlX1(), cubicCurve.getControlY1(), cubicCurve.getControlX2(), cubicCurve.getControlY2(), cubicCurve.getEndX(), cubicCurve.getEndY()));
+                    PathTransition pathTransition = new PathTransition();
+                    pathTransition.setDuration(Duration.millis(1500));
+                    pathTransition.setPath(path);
+                    pathTransition.setNode(rectangle);
+                    pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
+                    pathTransition.setCycleCount(Timeline.INDEFINITE);
+                    pathTransition.setAutoReverse(false);
+                    pathTransition.setDelay(Duration.millis(k*280));
+                    rects.getChildren().add(rectangle);
+                    parallelTransition.getChildren().add(pathTransition);
+                }
             }
         }
     }
@@ -317,6 +347,14 @@ public class Controller {
     }
 
     public void start(ActionEvent actionEvent) {
+        createLine = false;
+        parallelTransition.stop();
+        parallelTransition.getChildren().clear();
+        addChildrenToCanvas();
+        System.out.println(parallelTransition.getChildren().size());
+        parallelTransition.setCycleCount(Timeline.INDEFINITE);
+        parallelTransition.play();
+        createLine = true;
     }
 
     public void subLayer(ActionEvent actionEvent) {
