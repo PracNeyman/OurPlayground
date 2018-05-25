@@ -246,6 +246,8 @@ public class Controller {
     }
 
     void addLineBtwLayerAndOutput(Group group1){
+
+        String curColor = MyUtil.getRandomColor();
         for (int i = 0; i < group1.getChildren().size(); i++) {
             Circle inputCircle = (Circle) group1.getChildren().get(i);
             CubicCurve cubicCurve = new CubicCurve();
@@ -259,7 +261,6 @@ public class Controller {
             cubicCurve.setEndX(outputLayer.getLayoutX()+outputLayer.getFitWidth()/2);
             cubicCurve.setEndY(outputLayer.getLayoutY()+outputLayer.getFitHeight()/2);
 
-            String curColor = MyUtil.getRandomColor();
             cubicCurve.setStroke(Color.valueOf(curColor));
             cubicCurve.setStrokeWidth(2);
             cubicCurve.setStrokeLineCap(StrokeLineCap.ROUND);
@@ -278,7 +279,7 @@ public class Controller {
                 path.getElements().add(new MoveTo(cubicCurve.getStartX(), cubicCurve.getStartY()));
                 path.getElements().add(new CubicCurveTo(cubicCurve.getControlX1(), cubicCurve.getControlY1(), cubicCurve.getControlX2(), cubicCurve.getControlY2(), cubicCurve.getEndX(), cubicCurve.getEndY()));
                 PathTransition pathTransition = new PathTransition();
-                pathTransition.setDuration(Duration.millis(2000));
+                pathTransition.setDuration(Duration.millis(4000));
                 pathTransition.setPath(path);
                 pathTransition.setNode(rectangle);
                 pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
@@ -295,6 +296,7 @@ public class Controller {
     void addLineBtw2Layer(Group group1, Group group2){
         for (int i = 0; i < group1.getChildren().size(); i++) {
             Circle inputCircle = (Circle) group1.getChildren().get(i);
+            String curColor = MyUtil.getRandomColor();
             for (int j = 0; j < group2.getChildren().size();j++){
                 Circle hiddenCircle = (Circle) group2.getChildren().get(j);
                 CubicCurve cubicCurve = new CubicCurve();
@@ -311,7 +313,7 @@ public class Controller {
 //                cubicCurve.setControlY2(inputCircle.getLayoutY());
                 cubicCurve.setEndX(hiddenCircle.getLayoutX());
                 cubicCurve.setEndY(hiddenCircle.getLayoutY());
-                String curColor = MyUtil.getRandomColor();
+
                 cubicCurve.setStroke(Color.valueOf(curColor));
                 cubicCurve.setStrokeWidth(2);
                 cubicCurve.setStrokeLineCap(StrokeLineCap.ROUND);
@@ -329,7 +331,7 @@ public class Controller {
                     path.getElements().add(new MoveTo(cubicCurve.getStartX(), cubicCurve.getStartY()));
                     path.getElements().add(new CubicCurveTo(cubicCurve.getControlX1(), cubicCurve.getControlY1(), cubicCurve.getControlX2(), cubicCurve.getControlY2(), cubicCurve.getEndX(), cubicCurve.getEndY()));
                     PathTransition pathTransition = new PathTransition();
-                    pathTransition.setDuration(Duration.millis(1500));
+                    pathTransition.setDuration(Duration.millis(3500));
                     pathTransition.setPath(path);
                     pathTransition.setNode(rectangle);
                     pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
